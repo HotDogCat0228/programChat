@@ -17,7 +17,7 @@
 
 ## 🎯 線上展示
 
-[🔗 立即體驗](https://copilot-ask.vercel.app)
+[🔗 立即體驗](https://programchat.vercel.app) (部署完成後可用)
 
 ## 🚀 快速部署
 
@@ -25,7 +25,7 @@
 點擊右上角的 **Fork** 按鈕
 
 ### 2. 部署到 Vercel
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/你的用戶名/copilot-ask)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat)
 
 ### 3. 設定環境變數
 在 Vercel 專案設定中添加：
@@ -41,8 +41,8 @@ ADMIN_KEY=你的管理員密碼
 
 ```bash
 # 1. 克隆專案
-git clone https://github.com/你的用戶名/copilot-ask.git
-cd copilot-ask
+git clone https://github.com/HotDogCat0228/programChat.git
+cd programChat
 
 # 2. 安裝依賴
 npm install
@@ -143,4 +143,4 @@ const systemPrompt = "你是一個程式碼助手...";
 
 ⭐ 如果這個專案對你有幫助，請給個 Star！
 
-📧 有問題嗎？[開啟 Issue](https://github.com/你的用戶名/copilot-ask/issues/new)
+📧 有問題嗎？[開啟 Issue](https://github.com/HotDogCat0228/programChat/issues/new)
