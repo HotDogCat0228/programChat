@@ -11,7 +11,7 @@
 ### 第二步：部署到 Vercel
 1. 點擊下方按鈕開始部署：
 
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat)
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat&project-name=program-chat&repository-name=program-chat)
 
 2. 使用 GitHub 帳號登入 Vercel
 3. 選擇你的 GitHub 帳號

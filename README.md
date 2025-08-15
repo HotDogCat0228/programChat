@@ -17,7 +17,7 @@
 
 ## 🎯 線上展示
 
-[🔗 立即體驗](https://programchat.vercel.app) (部署完成後可用)
+[🔗 立即體驗](https://program-chat.vercel.app) (部署完成後可用)
 
 ## 🚀 快速部署
 
@@ -25,7 +25,7 @@
 點擊右上角的 **Fork** 按鈕
 
 ### 2. 部署到 Vercel
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat&project-name=program-chat&repository-name=program-chat)
 
 ### 3. 設定環境變數
 在 Vercel 專案設定中添加：
