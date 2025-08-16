@@ -1,5 +1,5 @@
 {
-  "name": "programchat-ai-helper",
+  "name": "hotdog-ai-chat-2025",
   "functions": {
     "pages/api/ask.js": {
       "maxDuration": 10
