@@ -24,17 +24,15 @@
 ### 1. Fork 此專案
 點擊右上角的 **Fork** 按鈕
 
-### 2. 部署到 Vercel
+### 2. 一鍵部署到 Vercel
 [![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHotDogCat0228%2FprogramChat.git&project-name=hotdog-ai-chat-2025)
 
-### 3. 設定環境變數
-在 Vercel 專案設定中添加：
-```
-GEMINI_API_KEY=你的Google_Gemini_API金鑰
-ADMIN_KEY=你的管理員密碼
-```
+**就是這麼簡單！** 🎉
+- ✅ API 金鑰已內建，無需額外設定
+- ✅ 直接點擊部署按鈕即可使用
+- ✅ 支援 Google Gemini API (免費額度)
 
-### 4. 完成！
+### 3. 完成！
 網站會自動建置和部署 🎉
 
 ## 🛠️ 本地開發
@@ -58,25 +56,27 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-## 🔑 API 金鑰取得
+## 🔑 API 金鑰資訊
 
-### Google Gemini API (免費)
+### 已內建 Google Gemini API ✅
+- **API 金鑰**: 已預設在程式碼中
+- **無需額外設定**: 直接部署即可使用
+- **免費額度**: 每分鐘 15 次請求，每日 1,500 次請求
+
+如需使用自己的 API 金鑰：
 1. 前往 [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. 創建新的 API 金鑰
-3. 複製金鑰到 `.env.local`
-
-**免費限制：**
-- 每分鐘 15 次請求
-- 每日 1,500 次請求
-- 完全免費使用
+3. 在 Vercel 環境變數中設定 `GEMINI_API_KEY`
 
 ## 📊 流量統計
 
-訪問 `/api/stats?key=你的管理員密碼` 查看：
+訪問 `/api/stats?key=admin123` 查看：
 - 總請求數和今日請求
 - 活躍用戶統計
 - 24小時使用分布圖
 - 成功率和錯誤追蹤
+
+**管理員密碼**: `admin123` (已內建)
 
 ## 🏗️ 技術架構
 

@@ -22,8 +22,11 @@ export default async function handler(req, res) {
     // 記錄請求到流量追蹤
     trackRequest(userIP, question);
 
-    // 檢查是否有 Gemini API 金鑰
-    if (!process.env.GEMINI_API_KEY) {
+    // 直接使用內建的 API 金鑰
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCxjtwRczdA22arUvOCCI7yEVgBN46KmQ0';
+    const ADMIN_KEY = process.env.ADMIN_KEY || 'admin123';
+    
+    if (!GEMINI_API_KEY) {
       const mockAnswer = `⚠️ **需要設定 AI API 金鑰**
 
 **你的問題**: ${question}
@@ -47,7 +50,7 @@ GEMINI_API_KEY=你的金鑰
     let answer;
     try {
       const { GoogleGenerativeAI } = require('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       

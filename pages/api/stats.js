@@ -1,9 +1,10 @@
 const { getAnalytics } = require('../../lib/analytics');
 
 export default function handler(req, res) {
-  // 簡單的身份驗證 (可選)
+  // 直接使用內建的管理員金鑰
+  const ADMIN_KEY = process.env.ADMIN_KEY || 'admin123';
   const adminKey = req.query.key;
-  if (process.env.ADMIN_KEY && adminKey !== process.env.ADMIN_KEY) {
+  if (adminKey !== ADMIN_KEY) {
     return res.status(401).json({ error: '需要管理員權限' });
   }
 
