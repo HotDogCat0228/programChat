@@ -1,4 +1,4 @@
-const { getAnalytics } = require('../../lib/analytics');
+const { getAnalytics } = require('../../lib/analytics-simple');
 
 export default function handler(req, res) {
   // 直接使用內建的管理員金鑰
@@ -148,8 +148,19 @@ export default function handler(req, res) {
       <div class="card">
         <h2>🔧 系統資訊</h2>
         <p><strong>錯誤次數:</strong> ${stats.錯誤次數}</p>
+        <p><strong>系統狀態:</strong> ${stats.系統狀態}</p>
+        <p><strong>數據來源:</strong> ${stats.數據來源}</p>
         <p><strong>最後更新:</strong> ${new Date().toLocaleString('zh-TW')}</p>
         <button class="refresh-btn" onclick="window.location.reload()">刷新數據</button>
+        
+        <div style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 6px; font-size: 0.9em;">
+          <h4 style="color: #1e40af; margin: 0 0 0.5rem 0;">💡 統計說明</h4>
+          <p style="margin: 0; color: #1e40af;">
+            • 在 Serverless 環境中，統計數據會結合實時記錄和模擬數據<br>
+            • 每次 API 調用都會記錄到 Vercel 日誌中<br>
+            • 可在 Vercel Dashboard > Functions > View Function Logs 查看實時記錄
+          </p>
+        </div>
       </div>
 
       <div class="time">

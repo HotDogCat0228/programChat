@@ -17,7 +17,7 @@
 
 ## 🎯 線上展示
 
-[🔗 立即體驗](https://hotdog-ai-chat-2025.vercel.app) (部署完成後可用)
+[🔗 立即體驗](https://aicodechat-psi.vercel.app) (部署完成後可用)
 
 ## 🚀 快速部署
 
