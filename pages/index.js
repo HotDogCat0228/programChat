@@ -8,6 +8,15 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
 
+  // 處理鍵盤事件
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault() // 防止換行
+      handleSubmit(e)
+    }
+    // Shift+Enter 會自然換行，不需要特別處理
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!question.trim()) return
@@ -26,7 +35,7 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          question,
+          question: newConversations[newConversations.length - 1].content,
           sessionId,
           conversationHistory: newConversations.slice(-10) // 只發送最近10條對話記錄
         })
@@ -56,11 +65,28 @@ export default function Home() {
       }])
     } finally {
       setIsLoading(false)
+      // 提交後自動滾動到最新訊息
+      setTimeout(() => {
+        const lastMessage = document.querySelector('.conversation-item:last-child')
+        if (lastMessage) {
+          lastMessage.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest'
+          })
+        }
+      }, 100)
     }
   }
 
   const clearConversation = () => {
     setConversations([])
+    // 清除後聚焦到輸入框
+    setTimeout(() => {
+      const inputElement = document.querySelector('.question-input')
+      if (inputElement) {
+        inputElement.focus()
+      }
+    }, 100)
   }
 
   return (
@@ -71,35 +97,25 @@ export default function Home() {
       </header>
 
       <main>
-        <form onSubmit={handleSubmit} className="question-form">
-          <div className="input-group">
-            <textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="在這裡輸入您的程式問題..."
-              className="question-input"
-              rows="4"
-              disabled={isLoading}
-            />
+        {conversations.length === 0 && (
+          <div className="welcome-section">
+            <div className="welcome-card">
+              <h2>👋 歡迎使用 AI 程式碼助手！</h2>
+              <p>我可以幫您解答各種程式設計問題，包括：</p>
+              <div className="feature-list">
+                <div className="feature-item">🔧 程式碼除錯與優化</div>
+                <div className="feature-item">📚 技術概念解釋</div>
+                <div className="feature-item">💡 最佳實踐建議</div>
+                <div className="feature-item">🚀 框架與函式庫使用</div>
+              </div>
+              <p className="tip">💬 <strong>對話記憶</strong>：我會記住我們的對話內容，可以進行連續問答</p>
+              <p className="tip">⌨️ <strong>快捷鍵</strong>：按 <kbd>Enter</kbd> 發送，<kbd>Shift + Enter</kbd> 換行</p>
+            </div>
           </div>
-          <button 
-            type="submit" 
-            disabled={!question.trim() || isLoading}
-            className={`submit-button ${isLoading ? 'loading' : ''}`}
-          >
-            {isLoading ? '思考中...' : '發送問題'}
-          </button>
-        </form>
+        )}
 
         {conversations.length > 0 && (
           <div className="conversation-history">
-            <div className="history-header">
-              <h3>對話記錄</h3>
-              <button onClick={clearConversation} className="clear-btn">
-                🗑️ 清除記錄
-              </button>
-            </div>
-            
             {conversations.map((conv, index) => (
               <div key={index} className={`conversation-item ${conv.type}`}>
                 {conv.type === 'question' && (
@@ -159,19 +175,44 @@ export default function Home() {
         )}
       </main>
 
+      {/* 固定在底部的輸入區域 */}
+      <div className="input-container">
+        {conversations.length > 0 && (
+          <div className="chat-controls">
+            <button onClick={clearConversation} className="clear-btn">
+              🗑️ 清除對話
+            </button>
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="question-form">
+          <div className="input-group">
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="在這裡輸入您的程式問題... (Enter發送，Shift+Enter換行)"
+              className="question-input"
+              rows="3"
+              disabled={isLoading}
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={!question.trim() || isLoading}
+            className={`submit-button ${isLoading ? 'loading' : ''}`}
+          >
+            {isLoading ? '思考中...' : '發送 ⏎'}
+          </button>
+        </form>
+      </div>
+
       {/* 管理員統計連結 */}
-      <div style={{ textAlign: 'center', marginTop: '1rem', opacity: 0.6 }}>
+      <div className="stats-link">
         <a 
           href="/api/stats?key=admin123" 
           target="_blank"
-          style={{ 
-            color: '#ffffff', 
-            fontSize: '0.8rem', 
-            textDecoration: 'none',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            background: 'rgba(255,255,255,0.1)'
-          }}
+          rel="noopener noreferrer"
         >
           📊 統計
         </a>
@@ -180,14 +221,17 @@ export default function Home() {
       <style jsx>{`
         .container {
           min-height: 100vh;
-          padding: 2rem;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 200px; /* 為固定輸入框留空間 */
         }
 
         header {
           text-align: center;
-          margin-bottom: 3rem;
+          padding: 2rem 2rem 1rem 2rem;
+          flex-shrink: 0;
         }
 
         h1 {
@@ -206,21 +250,58 @@ export default function Home() {
         }
 
         main {
+          flex: 1;
+          padding: 0 2rem;
+          overflow-y: auto;
           max-width: 800px;
           margin: 0 auto;
+          width: 100%;
+        }
+
+        .input-container {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 1rem 2rem 2rem 2rem;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+          z-index: 100;
+        }
+
+        .chat-controls {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1rem;
+        }
+
+        .clear-btn {
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+          border: 1px solid rgba(102, 126, 234, 0.3);
+          padding: 0.5rem 1rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+          background: rgba(102, 126, 234, 0.2);
         }
 
         .question-form {
-          background: white;
-          padding: 2rem;
-          border-radius: 1rem;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          margin-bottom: 2rem;
-          backdrop-filter: blur(10px);
+          max-width: 800px;
+          margin: 0 auto;
+          display: flex;
+          gap: 1rem;
+          align-items: flex-end;
         }
 
         .input-group {
-          margin-bottom: 1.5rem;
+          flex: 1;
         }
 
         .question-input {
@@ -231,8 +312,9 @@ export default function Home() {
           font-size: 1rem;
           font-family: inherit;
           resize: vertical;
-          min-height: 120px;
+          min-height: 60px;
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          background: white;
         }
 
         .question-input:focus {
@@ -249,7 +331,7 @@ export default function Home() {
         .submit-button {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 1rem 2rem;
+          padding: 1rem 1.5rem;
           border: none;
           border-radius: 0.75rem;
           font-size: 1rem;
@@ -257,6 +339,7 @@ export default function Home() {
           cursor: pointer;
           transition: all 0.2s ease;
           box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+          flex-shrink: 0;
         }
 
         .submit-button:hover:not(:disabled) {
@@ -295,59 +378,67 @@ export default function Home() {
           100% { transform: rotate(360deg); }
         }
 
-        .answer-section {
-          background: white;
+        .welcome-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 60vh;
+          padding: 2rem 0;
+        }
+
+        .welcome-card {
+          background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 1rem;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+          text-align: center;
+          max-width: 600px;
         }
 
-        .answer-section h3 {
+        .welcome-card h2 {
           color: #2d3748;
-          font-size: 1.25rem;
-          font-weight: 600;
           margin-bottom: 1rem;
-          padding-bottom: 0.5rem;
-          border-bottom: 2px solid #e2e8f0;
+          font-size: 1.5rem;
         }
 
-        .answer-content {
+        .welcome-card p {
           color: #4a5568;
-          line-height: 1.7;
+          margin-bottom: 1rem;
+          line-height: 1.6;
+        }
+
+        .feature-list {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+          margin: 1rem 0;
+          text-align: left;
+        }
+
+        .feature-item {
+          color: #667eea;
+          font-size: 0.9rem;
+          padding: 0.25rem;
+        }
+
+        .tip {
+          font-size: 0.9rem;
+          color: #6b7280 !important;
+          margin: 0.5rem 0 !important;
+        }
+
+        .tip kbd {
+          background: #f3f4f6;
+          border: 1px solid #d1d5db;
+          border-radius: 3px;
+          padding: 2px 4px;
+          font-family: monospace;
+          font-size: 0.8em;
         }
 
         .conversation-history {
-          max-width: 800px;
-          margin: 0 auto 2rem;
-        }
-
-        .history-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-          padding: 0 1rem;
-        }
-
-        .history-header h3 {
-          color: white;
-          margin: 0;
-          font-size: 1.2rem;
-        }
-
-        .clear-btn {
-          background: rgba(255, 255, 255, 0.1);
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          padding: 0.5rem 1rem;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: all 0.2s ease;
-        }
-
-        .clear-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
+          padding-bottom: 2rem;
         }
 
         .conversation-item {
@@ -438,8 +529,34 @@ export default function Home() {
           }
         }
 
+        .stats-link {
+          position: fixed;
+          top: 1rem;
+          right: 1rem;
+          z-index: 1000;
+        }
+
+        .stats-link a {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.8rem;
+          text-decoration: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.1);
+          transition: all 0.2s ease;
+        }
+
+        .stats-link a:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+        }
+
         @media (max-width: 768px) {
           .container {
+            padding-bottom: 220px;
+          }
+
+          header {
             padding: 1rem;
           }
 
@@ -447,8 +564,30 @@ export default function Home() {
             font-size: 2rem;
           }
 
-          .question-form, .answer-section {
-            padding: 1.5rem;
+          main {
+            padding: 0 1rem;
+          }
+
+          .input-container {
+            padding: 1rem;
+          }
+
+          .question-form {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .submit-button {
+            width: 100%;
+          }
+
+          .question-bubble, .answer-bubble, .error-bubble {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+          }
+
+          .feature-list {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
