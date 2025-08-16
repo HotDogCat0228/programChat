@@ -1,16 +1,5 @@
 {
   "name": "programchat-ai-helper",
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next@12.2.5"
-    }
-  ],
-  "env": {
-    "GEMINI_API_KEY": "@gemini_api_key",
-    "ADMIN_KEY": "@admin_key"
-  },
   "functions": {
     "pages/api/ask.js": {
       "maxDuration": 10
