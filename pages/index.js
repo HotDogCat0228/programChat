@@ -4,15 +4,20 @@ import remarkGfm from 'remark-gfm'
 
 export default function Home() {
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('')
+  const [conversations, setConversations] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionId] = useState(() => 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!question.trim()) return
 
     setIsLoading(true)
-    setAnswer('')
+
+    // 添加用戶問題到對話記錄
+    const newConversations = [...conversations, { type: 'question', content: question, timestamp: new Date() }]
+    setConversations(newConversations)
+    setQuestion('')
 
     try {
       const response = await fetch('/api/ask', {
@@ -20,21 +25,42 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ 
+          question,
+          sessionId,
+          conversationHistory: newConversations.slice(-10) // 只發送最近10條對話記錄
+        })
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        setAnswer(data.answer)
+        // 添加 AI 回答到對話記錄
+        setConversations(prev => [...prev, { 
+          type: 'answer', 
+          content: data.answer, 
+          timestamp: new Date() 
+        }])
       } else {
-        setAnswer(data.error || '發生錯誤，請重試。')
+        setConversations(prev => [...prev, { 
+          type: 'error', 
+          content: data.error || '發生錯誤，請重試。', 
+          timestamp: new Date() 
+        }])
       }
     } catch (error) {
-      setAnswer('連接失敗，請檢查網絡連接並重試。')
+      setConversations(prev => [...prev, { 
+        type: 'error', 
+        content: '連接失敗，請檢查網絡連接並重試。', 
+        timestamp: new Date() 
+      }])
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const clearConversation = () => {
+    setConversations([])
   }
 
   return (
@@ -65,14 +91,70 @@ export default function Home() {
           </button>
         </form>
 
-        {answer && (
-          <div className="answer-section">
-            <h3>回答：</h3>
-            <div className="answer-content markdown-content">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {answer}
-              </ReactMarkdown>
+        {conversations.length > 0 && (
+          <div className="conversation-history">
+            <div className="history-header">
+              <h3>對話記錄</h3>
+              <button onClick={clearConversation} className="clear-btn">
+                🗑️ 清除記錄
+              </button>
             </div>
+            
+            {conversations.map((conv, index) => (
+              <div key={index} className={`conversation-item ${conv.type}`}>
+                {conv.type === 'question' && (
+                  <div className="question-bubble">
+                    <div className="bubble-header">
+                      <span className="user-icon">👤</span>
+                      <span className="timestamp">{conv.timestamp.toLocaleTimeString('zh-TW')}</span>
+                    </div>
+                    <div className="bubble-content">{conv.content}</div>
+                  </div>
+                )}
+                
+                {conv.type === 'answer' && (
+                  <div className="answer-bubble">
+                    <div className="bubble-header">
+                      <span className="ai-icon">🤖</span>
+                      <span className="timestamp">{conv.timestamp.toLocaleTimeString('zh-TW')}</span>
+                    </div>
+                    <div className="bubble-content markdown-content">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {conv.content}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+                
+                {conv.type === 'error' && (
+                  <div className="error-bubble">
+                    <div className="bubble-header">
+                      <span className="error-icon">❌</span>
+                      <span className="timestamp">{conv.timestamp.toLocaleTimeString('zh-TW')}</span>
+                    </div>
+                    <div className="bubble-content">{conv.content}</div>
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="conversation-item answer">
+                <div className="answer-bubble loading-bubble">
+                  <div className="bubble-header">
+                    <span className="ai-icon">🤖</span>
+                    <span className="timestamp">思考中...</span>
+                  </div>
+                  <div className="bubble-content">
+                    <div className="typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -232,6 +314,128 @@ export default function Home() {
         .answer-content {
           color: #4a5568;
           line-height: 1.7;
+        }
+
+        .conversation-history {
+          max-width: 800px;
+          margin: 0 auto 2rem;
+        }
+
+        .history-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding: 0 1rem;
+        }
+
+        .history-header h3 {
+          color: white;
+          margin: 0;
+          font-size: 1.2rem;
+        }
+
+        .clear-btn {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 0.5rem 1rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .conversation-item {
+          margin-bottom: 1.5rem;
+        }
+
+        .question-bubble, .answer-bubble, .error-bubble {
+          background: white;
+          border-radius: 1rem;
+          padding: 1.5rem;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          position: relative;
+        }
+
+        .question-bubble {
+          background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+          margin-left: 2rem;
+        }
+
+        .answer-bubble {
+          background: white;
+          margin-right: 2rem;
+        }
+
+        .error-bubble {
+          background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+          margin-left: 2rem;
+        }
+
+        .loading-bubble {
+          background: #f8f9fa;
+        }
+
+        .bubble-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .user-icon, .ai-icon, .error-icon {
+          font-size: 1.5rem;
+          margin-right: 0.75rem;
+        }
+
+        .timestamp {
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin-left: auto;
+        }
+
+        .bubble-content {
+          color: #2d3748;
+          line-height: 1.6;
+        }
+
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .typing-indicator span {
+          height: 8px;
+          width: 8px;
+          background: #667eea;
+          border-radius: 50%;
+          animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+          0%, 60%, 100% {
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          30% {
+            transform: scale(1.2);
+            opacity: 1;
+          }
         }
 
         @media (max-width: 768px) {

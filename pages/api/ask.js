@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { question } = req.body;
+    const { question, sessionId, conversationHistory } = req.body;
     
     // 獲取用戶 IP (用於匿名統計)
     const userIP = req.headers['x-forwarded-for'] || 
@@ -19,8 +19,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '請輸入問題' });
     }
 
-    // 記錄請求到流量追蹤
-    trackRequest(userIP, question);
+    // 記錄請求到流量追蹤 (包含會話資訊)
+    trackRequest(userIP, question, sessionId);
 
     // 直接使用內建的 API 金鑰
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCxjtwRczdA22arUvOCCI7yEVgBN46KmQ0';
@@ -59,9 +59,36 @@ GEMINI_API_KEY=你的金鑰
       console.log('- 問題長度:', question.length, '字元');
       console.log('- 免費限制: 15 請求/分鐘, 1500 請求/日');
       
-      const systemPrompt = "你是一個程式碼助手，類似 GitHub Copilot。請用繁體中文回答程式碼相關問題。\n\n特點：\n- 提供清楚、實用的程式碼建議\n- 包含程式碼範例和解釋\n- 重點是實務應用和最佳實踐\n- 可以回答各種程式語言的問題（JavaScript、TypeScript、Python、React、Next.js 等）\n- 用 Markdown 格式回答，包含程式碼區塊\n\n請保持回答簡潔但完整，重點放在實用性。";
+      const systemPrompt = "你是一個程式碼助手，類似 GitHub Copilot。請用繁體中文回答程式碼相關問題。\n\n特點：\n- 提供清楚、實用的程式碼建議\n- 包含程式碼範例和解釋\n- 重點是實務應用和最佳實踐\n- 可以回答各種程式語言的問題（JavaScript、TypeScript、Python、React、Next.js 等）\n- 用 Markdown 格式回答，包含程式碼區塊\n- 能夠根據對話歷史提供連續性的回答\n- 如果用戶提到「之前」、「剛才」或類似詞彙，請參考對話記錄\n\n請保持回答簡潔但完整，重點放在實用性。";
       
-      const fullPrompt = systemPrompt + "\n\n問題：" + question;
+      // 構建包含上下文的完整提示詞
+      let fullPrompt = systemPrompt;
+      
+      if (conversationHistory && conversationHistory.length > 0) {
+        fullPrompt += "\n\n=== 對話記錄 ===\n";
+        
+        // 只取最近的對話記錄，避免提示詞過長
+        const recentHistory = conversationHistory.slice(-6);
+        
+        recentHistory.forEach((conv, index) => {
+          if (conv.type === 'question') {
+            fullPrompt += `\n[用戶 ${conv.timestamp ? new Date(conv.timestamp).toLocaleTimeString('zh-TW') : ''}]: ${conv.content}`;
+          } else if (conv.type === 'answer') {
+            // 截短之前的回答，避免提示詞過長
+            const shortAnswer = conv.content.length > 200 ? conv.content.substring(0, 200) + '...' : conv.content;
+            fullPrompt += `\n[助手]: ${shortAnswer}`;
+          }
+        });
+        
+        fullPrompt += "\n\n=== 當前問題 ===\n";
+      }
+      
+      fullPrompt += "\n問題：" + question;
+
+      console.log('📊 對話請求詳情:');
+      console.log('- 會話ID:', sessionId);
+      console.log('- 對話記錄:', conversationHistory ? conversationHistory.length : 0, '條');
+      console.log('- 提示詞長度:', fullPrompt.length, '字元');
 
       const result = await model.generateContent(fullPrompt);
       const response = await result.response;

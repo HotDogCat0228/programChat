@@ -102,12 +102,25 @@ export default function handler(req, res) {
             <div class="stat-label">今日請求</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">${stats.活躍用戶}</div>
-            <div class="stat-label">活躍用戶</div>
-          </div>
-          <div class="stat-item">
             <div class="stat-number">${stats.成功率}</div>
             <div class="stat-label">成功率</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>💬 對話功能</h2>
+        <p><strong>✅ 上下文記憶</strong>: 支援連續對話，AI 可以參考之前的問題和回答</p>
+        <p><strong>🔄 會話管理</strong>: 每個用戶會話獨立追蹤，支援多輪對話</p>
+        <p><strong>📝 對話記錄</strong>: 即時顯示問答歷史，可一鍵清除</p>
+        <p><strong>⚡ 智能回應</strong>: AI 能理解「之前的問題」、「剛才提到的」等上下文</p>
+          <div class="stat-item">
+            <div class="stat-number">${stats.活躍會話}</div>
+            <div class="stat-label">活躍會話</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">${stats.平均對話輪數}</div>
+            <div class="stat-label">平均對話輪數</div>
           </div>
         </div>
       </div>
