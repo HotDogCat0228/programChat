@@ -17,7 +17,7 @@
 
 ## 🎯 線上展示
 
-[🔗 立即體驗](https://programchat-ai-helper.vercel.app) (部署完成後可用)
+[🔗 立即體驗](https://hotdog-ai-chat-2025.vercel.app) (部署完成後可用)
 
 ## 🚀 快速部署
 
@@ -25,7 +25,7 @@
 點擊右上角的 **Fork** 按鈕
 
 ### 2. 部署到 Vercel
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/HotDogCat0228/programChat&project-name=programchat-ai-helper&repository-name=programchat-ai-helper)
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHotDogCat0228%2FprogramChat.git&project-name=hotdog-ai-chat-2025)
 
 ### 3. 設定環境變數
 在 Vercel 專案設定中添加：
